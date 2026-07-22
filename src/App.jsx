@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react'
 const Arrow = () => <span aria-hidden="true">↗</span>
 
 const frames = [
-  { src: '/images/facturo-home.png', label: 'Product experience', title: 'Swiss invoicing, made legible', text: 'A clear entry point for QR-Bill invoicing, VAT, clients, and cash flow.', href: 'https://facturo.ch' },
-  { src: '/images/facturo-pricing.png', label: 'Revenue system', title: 'Plans connected to real access', text: 'Four subscription levels, server-owned plan logic, and Stripe-backed state.', href: 'https://facturo.ch/pricing' },
-  { src: '/images/facturo-referral.png', label: 'Growth system', title: 'Nine tiers, exact outcomes', text: 'Threshold-driven commissions with predictable monthly payouts.', href: 'https://facturo.ch/referral-program' },
+  { src: `${import.meta.env.BASE_URL}images/facturo-home.png`, label: 'Product experience', title: 'Swiss invoicing, made legible', text: 'A clear entry point for QR-Bill invoicing, VAT, clients, and cash flow.', href: 'https://facturo.ch' },
+  { src: `${import.meta.env.BASE_URL}images/facturo-pricing.png`, label: 'Revenue system', title: 'Plans connected to real access', text: 'Four subscription levels, server-owned plan logic, and Stripe-backed state.', href: 'https://facturo.ch/pricing' },
+  { src: `${import.meta.env.BASE_URL}images/facturo-referral.png`, label: 'Growth system', title: 'Nine tiers, exact outcomes', text: 'Threshold-driven commissions with predictable monthly payouts.', href: 'https://facturo.ch/referral-program' },
 ]
 
 const decisions = [
