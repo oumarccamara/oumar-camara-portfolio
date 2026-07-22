@@ -48,7 +48,17 @@ function useMotionSystem() {
 
 function Header() {
   const [open, setOpen] = useState(false)
+  useEffect(() => {
+    document.body.classList.toggle('menu-open', open)
+    const close = (event) => event.key === 'Escape' && setOpen(false)
+    addEventListener('keydown', close)
+    return () => {
+      document.body.classList.remove('menu-open')
+      removeEventListener('keydown', close)
+    }
+  }, [open])
   return <>
+    <a className="skip-link" href="#main">Skip to content</a>
     <header className="site-header">
       <a className="wordmark" href="#top" aria-label="Oumar Camara, home"><b>Oumar</b> Camara</a>
       <div className="header-center"><span>Full-stack product engineer</span><span>Switzerland · CET</span></div>
@@ -65,16 +75,23 @@ function Header() {
 function Hero() {
   return <section className="hero" id="top">
     <div className="hero-status" data-reveal><i /> Available for selected frontend &amp; full-stack roles</div>
-    <h1 aria-label="I engineer the parts users should never have to think about">
+    <h1 aria-label="I engineer what users should never have to think about">
       <span className="hero-line line-a"><i>I engineer</i></span>
-      <span className="hero-line line-b"><i>the parts users</i></span>
-      <span className="hero-line line-c"><i>should never have to</i></span>
-      <span className="hero-line line-d"><i>think about.</i></span>
+      <span className="hero-line line-b"><i>what users</i></span>
+      <span className="hero-line line-c"><i>should never</i></span>
+      <span className="hero-line line-d"><i>have to</i></span>
+      <span className="hero-line line-e"><i>think about.</i></span>
     </h1>
     <div className="hero-foot" data-reveal>
-      <div className="hero-intro"><p>Product-minded engineer turning complex rules into interfaces that feel obvious and systems that stay correct.</p><div className="hero-socials"><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a></div></div>
+      <div className="hero-intro"><p>Product-minded engineer turning complex rules into interfaces that feel obvious and systems that stay correct.</p><div className="hero-socials"><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a><a href="mailto:omarcamaraq@gmail.com?subject=Portfolio%20conversation">Email <Arrow /></a></div></div>
       <a className="round-link" href="#work"><span>Explore<br/>selected work</span><b>↓</b></a>
       <p className="hero-index">React · TypeScript · Supabase · Stripe</p>
+    </div>
+    <div className="hero-proof" data-reveal aria-label="Facturo product facts">
+      <span><strong>Live</strong> production SaaS</span>
+      <span><strong>5</strong> product languages</span>
+      <span><strong>4</strong> subscription plans</span>
+      <span><strong>9</strong> referral tiers</span>
     </div>
     <span className="hero-orbit" aria-hidden="true">BUILD · SHIP · LEARN ·</span>
   </section>
@@ -93,11 +110,16 @@ function Work() {
     <div className="section-top" data-reveal><span>01 / Selected work</span><span>One product · Full ownership · Live</span></div>
     <div className="work-title" data-reveal><p>Case study</p><h2>Facturo<span>®</span></h2><a href="https://facturo.ch" target="_blank" rel="noopener noreferrer">Live product <Arrow /></a></div>
     <div className="case-overview" data-reveal><p>A production SaaS for Swiss freelancers and SMEs. I owned the experience, data model, payment infrastructure, security boundaries, and deployment.</p><div><span>Role</span><b>Founder / Engineer</b><span>Stack</span><b>React / TS / Supabase / Stripe</b></div></div>
+    <div className="case-brief" data-reveal>
+      <article><span>01 / Problem</span><p>Swiss invoicing combines VAT, QR payment standards, multilingual documents, customer data, and subscription access. Each rule must stay correct without making the workflow feel complicated.</p></article>
+      <article><span>02 / Approach</span><p>I designed one product model across the interface, database policies, invoice output, and payment state, then built clear paths for the common work users need to finish.</p></article>
+      <article><span>03 / Result</span><p>A live SaaS where freelancers and SMEs can move from client details to compliant invoices, billing, and referrals in one coherent product.</p></article>
+    </div>
     <div className="project-rows">
       {frames.map((frame, index) => <article className="project-row" data-reveal key={frame.title}>
         <a className="project-media" href={frame.href} target="_blank" rel="noopener noreferrer">
           <div className="browser-chrome"><i/><i/><i/><span>facturo.ch</span></div>
-          <img src={frame.src} alt={`${frame.title} in the live Facturo product`} />
+          <img src={frame.src} alt={`${frame.title} in the live Facturo product`} loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />
           <b>Open live experience <Arrow /></b>
         </a>
         <div className="project-copy"><span>0{index + 1}</span><small>{frame.label}</small><h3>{frame.title}</h3><p>{frame.text}</p><a href={frame.href} target="_blank" rel="noopener noreferrer">View live <Arrow /></a></div>
@@ -149,5 +171,5 @@ function Footer() {
 
 export default function App() {
   useMotionSystem()
-  return <><Header/><main><Hero/><Statement/><Work/><Decisions/><HiringSignal/><About/></main><Footer/></>
+  return <><Header/><main id="main"><Hero/><Statement/><Work/><Decisions/><HiringSignal/><About/></main><Footer/></>
 }
