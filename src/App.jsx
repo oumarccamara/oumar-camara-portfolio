@@ -3,7 +3,7 @@ import { languages, translations } from './i18n'
 
 const Arrow = () => <span aria-hidden="true">↗</span>
 const frameLinks = ['https://facturo.ch', 'https://facturo.ch/pricing', 'https://facturo.ch/referral-program']
-const frameImages = ['facturo-home.png', 'facturo-pricing.png', 'facturo-referral.png']
+const frameImages = ['facturo-home', 'facturo-pricing', 'facturo-referral']
 
 function useMotionSystem() {
   useEffect(() => {
@@ -33,21 +33,54 @@ function useMotionSystem() {
 function LanguageSwitcher({ lang, setLang, label }) {
   const [open, setOpen] = useState(false)
   const root = useRef(null)
+  const trigger = useRef(null)
+  const getOptions = () => [...(root.current?.querySelectorAll('[role="menuitemradio"]') || [])]
+  const closeMenu = (restoreFocus = false) => {
+    setOpen(false)
+    if (restoreFocus) requestAnimationFrame(() => trigger.current?.focus())
+  }
   useEffect(() => {
     const close = (event) => {
-      if (event.key === 'Escape') setOpen(false)
-      if (event.type === 'pointerdown' && !root.current?.contains(event.target)) setOpen(false)
+      if (event.key === 'Escape' && open) closeMenu(true)
+      if (event.type === 'pointerdown' && !root.current?.contains(event.target)) closeMenu()
     }
     addEventListener('keydown', close)
     addEventListener('pointerdown', close)
     return () => { removeEventListener('keydown', close); removeEventListener('pointerdown', close) }
-  }, [])
+  }, [open])
+  useEffect(() => {
+    if (!open) return
+    let innerFrame
+    const frame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(() => getOptions().find((button) => button.dataset.code === lang)?.focus())
+    })
+    return () => {
+      cancelAnimationFrame(frame)
+      if (innerFrame) cancelAnimationFrame(innerFrame)
+    }
+  }, [open, lang])
+  const openMenu = () => {
+    setOpen(true)
+  }
+  const handleMenuKey = (event) => {
+    const options = getOptions()
+    const active = options.indexOf(document.activeElement)
+    let next
+    if (event.key === 'ArrowDown') next = (active + 1) % options.length
+    if (event.key === 'ArrowUp') next = (active - 1 + options.length) % options.length
+    if (event.key === 'Home') next = 0
+    if (event.key === 'End') next = options.length - 1
+    if (next !== undefined) {
+      event.preventDefault()
+      options[next]?.focus()
+    }
+  }
   return <div className="language-switcher" ref={root}>
-    <button type="button" className="language-button" aria-label={`${label}: ${languages.find(([code]) => code === lang)[2]}`} aria-expanded={open} aria-controls="language-menu" onClick={() => setOpen(!open)}>
+    <button ref={trigger} type="button" className="language-button" aria-label={`${label}: ${languages.find(([code]) => code === lang)[2]}`} aria-haspopup="menu" aria-expanded={open} aria-controls="language-menu" onClick={() => open ? closeMenu() : openMenu()}>
       <span>{lang.toUpperCase()}</span><i aria-hidden="true">⌄</i>
     </button>
-    <div className={`language-menu ${open ? 'open' : ''}`} id="language-menu" role="menu" aria-label={label}>
-      {languages.map(([code, short, name]) => <button type="button" role="menuitemradio" aria-checked={lang === code} className={lang === code ? 'active' : ''} key={code} onClick={() => { setLang(code); setOpen(false) }}><span>{short}</span>{name}<i aria-hidden="true">✓</i></button>)}
+    <div className={`language-menu ${open ? 'open' : ''}`} id="language-menu" role="menu" aria-label={label} onKeyDown={handleMenuKey}>
+      {languages.map(([code, short, name]) => <button data-code={code} type="button" role="menuitemradio" aria-checked={lang === code} className={lang === code ? 'active' : ''} key={code} onClick={() => { setLang(code); closeMenu(true) }}><span>{short}</span>{name}<i aria-hidden="true">✓</i></button>)}
     </div>
   </div>
 }
@@ -67,7 +100,7 @@ function Header({ t, lang, setLang }) {
       <div className="header-center"><span>{t.role}</span><span>{t.location}</span></div>
       <div className="header-actions"><LanguageSwitcher lang={lang} setLang={setLang} label={t.language}/><button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="menu"><span>{open ? t.close : t.menu}</span><i /></button></div>
     </header>
-    <div className={`menu-panel ${open ? 'open' : ''}`} id="menu" aria-hidden={!open}>
+    <div className={`menu-panel ${open ? 'open' : ''}`} id="menu" aria-hidden={!open} inert={!open ? true : undefined}>
       <nav>{t.nav.map((label, i) => <a key={label} href={['#work','#decisions','#about'][i]} onClick={() => setOpen(false)}><small>0{i + 1}</small>{label}<Arrow /></a>)}</nav>
       <div className="menu-contact"><a href={`${import.meta.env.BASE_URL}cv/oumar-camara-${lang}.html`} download>{t.resume}</a><a href="mailto:omarcamaraq@gmail.com">{t.email}</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a></div>
     </div>
@@ -100,8 +133,8 @@ function Work({ t }) {
     <div className="case-overview" data-reveal><p>{t.overview}</p><div><span>{t.roleLabel}</span><b>{t.roleValue}</b><span>{t.stack}</span><b>React / TS / Supabase / Stripe</b></div></div>
     <div className="case-brief" data-reveal>{t.briefs.map(([title, text]) => <article key={title}><span>{title}</span><p>{text}</p></article>)}</div>
     <div className="project-rows">{t.frames.map(([label, title, text], index) => <article className="project-row" data-reveal key={title}>
-      <a className="project-media" href={frameLinks[index]} target="_blank" rel="noopener noreferrer"><div className="browser-chrome"><i/><i/><i/><span>facturo.ch</span></div><img src={`${import.meta.env.BASE_URL}images/${frameImages[index]}`} alt={`${title} ${t.imageAlt}`} loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" /><b>{t.openLive} <Arrow /></b></a>
-      <div className="project-copy"><span>0{index + 1}</span><small>{label}</small><h3>{title}</h3><p>{text}</p><a href={frameLinks[index]} target="_blank" rel="noopener noreferrer">{t.viewLive} <Arrow /></a></div>
+      <a className="project-media" href={frameLinks[index]} target="_blank" rel="noopener noreferrer"><div className="browser-chrome"><i/><i/><i/><span>facturo.ch</span></div><img src={`${import.meta.env.BASE_URL}images/${frameImages[index]}-1200.jpg`} srcSet={`${import.meta.env.BASE_URL}images/${frameImages[index]}-720.jpg 720w, ${import.meta.env.BASE_URL}images/${frameImages[index]}-1200.jpg 1200w`} sizes="(max-width: 767px) calc(100vw - 54px), (max-width: 1099px) 58vw, 760px" width="1200" height="800" alt={`${title} ${t.imageAlt}`} loading="lazy" decoding="async" /><b>{t.openLive} <Arrow /></b></a>
+      <div className="project-copy"><span>0{index + 1}</span><small>{label}</small><h3>{title}</h3><p>{text}</p><dl className="project-details">{t.frameDetails[index].map((detail, detailIndex) => <div key={t.systemLabels[detailIndex]}><dt>{t.systemLabels[detailIndex]}</dt><dd>{detail}</dd></div>)}</dl><a href={frameLinks[index]} target="_blank" rel="noopener noreferrer">{t.viewLive} <Arrow /></a></div>
     </article>)}</div>
   </section>
 }

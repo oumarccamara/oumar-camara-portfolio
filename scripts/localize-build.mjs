@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { translations } from '../src/i18n.js'
 
 const rootUrl = 'https://oumarccamara.github.io/oumar-camara-portfolio'
@@ -6,11 +6,11 @@ const localeCodes = Object.keys(translations)
 const localeTags = { en: 'en_US', es: 'es_ES', de: 'de_DE', it: 'it_IT', fr: 'fr_FR' }
 const countryLabels = { en: 'Switzerland', es: 'Suiza', de: 'Schweiz', it: 'Svizzera', fr: 'Suisse' }
 const imageAlt = {
-  en: 'Facturo, a Swiss invoicing product built by Oumar Camara',
-  es: 'Facturo, un producto de facturación suiza creado por Oumar Camara',
-  de: 'Facturo, ein von Oumar Camara entwickeltes Schweizer Rechnungsprodukt',
-  it: 'Facturo, un prodotto di fatturazione svizzera creato da Oumar Camara',
-  fr: 'Facturo, un produit de facturation suisse créé par Oumar Camara',
+  en: 'Oumar Camara, full-stack product engineer',
+  es: 'Oumar Camara, ingeniero de producto full-stack',
+  de: 'Oumar Camara, Full-Stack Product Engineer',
+  it: 'Oumar Camara, ingegnere di prodotto full-stack',
+  fr: 'Oumar Camara, ingénieur produit full-stack',
 }
 const resumeLabels = {
   en: ['Full-stack Product Engineer', 'Profile', 'Product-minded engineer turning complex rules into intuitive interfaces and reliable systems.', 'Selected work', 'Creator and engineer of Facturo, a production SaaS for Swiss freelancers and SMEs.', 'Ownership', 'Product experience, data model, PostgreSQL RLS, Supabase, Stripe billing, security boundaries and deployment.', 'Capabilities', 'React · TypeScript · PostgreSQL · Supabase · Stripe · Accessibility · Product systems', 'Contact'],
@@ -34,7 +34,14 @@ const replaceMeta = (html, language) => {
     .replace(/(<meta property="og:locale" content=").*?(" \/>)/, `$1${localeTags[language]}$2`)
     .replace(/(<meta property="og:url" content=").*?(" \/>)/, `$1${pageUrl}$2`)
     .replace(/(<meta property="og:image:alt" content=").*?(" \/>)/, `$1${imageAlt[language]}$2`)
+    .replace('"inLanguage":"en"', `"inLanguage":"${language}"`)
+    .replace(`${rootUrl}/en/","sameAs"`, `${pageUrl}","sameAs"`)
 }
+
+await copyFile('public/images/portfolio-social-card.png', 'dist/images/portfolio-social-card.png')
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${localeCodes.map((code) => `  <url><loc>${rootUrl}/${code}/</loc>${localeCodes.map((alternate) => `<xhtml:link rel="alternate" hreflang="${alternate}" href="${rootUrl}/${alternate}/"/>`).join('')}<xhtml:link rel="alternate" hreflang="x-default" href="${rootUrl}/"/></url>`).join('\n')}\n</urlset>\n`
+await writeFile('dist/sitemap.xml', sitemap)
+await writeFile('dist/robots.txt', `User-agent: *\nAllow: /\nSitemap: ${rootUrl}/sitemap.xml\n`)
 
 for (const language of localeCodes) {
   await mkdir(`dist/${language}`, { recursive: true })

@@ -19,8 +19,9 @@ for (const code of codes) {
   const page = await readFile(`dist/${code}/index.html`, 'utf8')
   if (!page.includes(`<html lang="${code}">`) || !page.includes(`/${code}/`)) throw new Error(`${code} static metadata is invalid`)
 }
+for (const file of ['dist/images/portfolio-social-card.png', 'dist/sitemap.xml', 'dist/robots.txt']) await access(file)
 const app = await readFile('src/App.jsx', 'utf8')
-for (const requirement of ['aria-expanded', 'aria-controls', 'menuitemradio', 'aria-checked', 'rel="noopener noreferrer"', 'skip-link']) {
+for (const requirement of ['aria-expanded', 'aria-controls', 'aria-haspopup', 'menuitemradio', 'aria-checked', 'inert=', 'ArrowDown', 'rel="noopener noreferrer"', 'skip-link']) {
   if (!app.includes(requirement)) throw new Error(`Accessibility/security requirement missing: ${requirement}`)
 }
 console.log('Locale, metadata, résumé and accessibility checks passed for en, es, de, it and fr.')

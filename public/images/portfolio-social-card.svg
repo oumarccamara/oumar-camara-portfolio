@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#efede6"/>
+  <circle cx="1090" cy="90" r="150" fill="#caff38"/>
+  <rect x="0" y="548" width="1200" height="82" fill="#11120f"/>
+  <rect x="72" y="66" width="14" height="14" rx="7" fill="#ff5833"/>
+  <text x="104" y="80" fill="#11120f" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="2">FULL-STACK PRODUCT ENGINEER</text>
+  <text x="70" y="250" fill="#11120f" font-family="Georgia, 'Times New Roman', serif" font-size="116" letter-spacing="-5">Oumar Camara</text>
+  <text x="72" y="335" fill="#ff5833" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-style="italic">I make complex systems feel obvious.</text>
+  <line x1="72" y1="408" x2="1128" y2="408" stroke="#cbc9c0" stroke-width="2"/>
+  <text x="72" y="464" fill="#73746d" font-family="Arial, Helvetica, sans-serif" font-size="25">React · TypeScript · Supabase · Stripe</text>
+  <text x="72" y="596" fill="#efede6" font-family="Arial, Helvetica, sans-serif" font-size="22">SWITZERLAND / REMOTE EUROPE</text>
+  <text x="1128" y="596" text-anchor="end" fill="#caff38" font-family="Arial, Helvetica, sans-serif" font-size="22">PORTFOLIO 2026 ↗</text>
+</svg>
