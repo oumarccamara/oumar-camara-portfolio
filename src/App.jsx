@@ -1,42 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { languages, translations } from './i18n'
 
 const Arrow = () => <span aria-hidden="true">↗</span>
-
-const frames = [
-  { src: `${import.meta.env.BASE_URL}images/facturo-home.png`, label: 'Product experience', title: 'Swiss invoicing, made legible', text: 'A clear entry point for QR-Bill invoicing, VAT, clients, and cash flow.', href: 'https://facturo.ch' },
-  { src: `${import.meta.env.BASE_URL}images/facturo-pricing.png`, label: 'Revenue system', title: 'Plans connected to real access', text: 'Four subscription levels, server-owned plan logic, and Stripe-backed state.', href: 'https://facturo.ch/pricing' },
-  { src: `${import.meta.env.BASE_URL}images/facturo-referral.png`, label: 'Growth system', title: 'Nine tiers, exact outcomes', text: 'Threshold-driven commissions with predictable monthly payouts.', href: 'https://facturo.ch/referral-program' },
-]
-
-const decisions = [
-  ['01', 'Correctness before convenience', 'Invoice totals, VAT, PDF output, and QR payment data all derive from one typed model. No duplicated business logic across screens.'],
-  ['02', 'Failure is a normal state', 'Stripe events may be late or repeated. Verified, idempotent webhooks keep subscription access correct when the network is not.'],
-  ['03', 'Privacy at the data boundary', 'Supabase identifies the user; PostgreSQL Row-Level Security decides what they can read and write. UI filters are never treated as authorization.'],
-  ['04', 'Five languages, one product', 'Locale is part of the domain model, from interface copy and formatting to the final customer-facing invoice.'],
-]
+const frameLinks = ['https://facturo.ch', 'https://facturo.ch/pricing', 'https://facturo.ch/referral-program']
+const frameImages = ['facturo-home.png', 'facturo-pricing.png', 'facturo-referral.png']
 
 function useMotionSystem() {
   useEffect(() => {
     const root = document.documentElement
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) return
-
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const reveals = [...document.querySelectorAll('[data-reveal]')]
     root.classList.add('motion-ready')
     reveals.forEach((el) => {
       const rect = el.getBoundingClientRect()
       if (rect.top < innerHeight && rect.bottom > 0) el.classList.add('is-visible')
     })
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add('is-visible'))
-    }, { threshold: 0.13, rootMargin: '0px 0px -6% 0px' })
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add('is-visible')), { threshold: 0.13, rootMargin: '0px 0px -6% 0px' })
     reveals.forEach((el) => observer.observe(el))
-
     let frame
     const update = () => {
       const max = document.documentElement.scrollHeight - innerHeight
       root.style.setProperty('--scroll', max > 0 ? scrollY / max : 0)
-      root.style.setProperty('--scroll-px', `${scrollY}px`)
       frame = null
     }
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
@@ -46,130 +30,114 @@ function useMotionSystem() {
   }, [])
 }
 
-function Header() {
+function LanguageSwitcher({ lang, setLang, label }) {
+  const [open, setOpen] = useState(false)
+  const root = useRef(null)
+  useEffect(() => {
+    const close = (event) => {
+      if (event.key === 'Escape') setOpen(false)
+      if (event.type === 'pointerdown' && !root.current?.contains(event.target)) setOpen(false)
+    }
+    addEventListener('keydown', close)
+    addEventListener('pointerdown', close)
+    return () => { removeEventListener('keydown', close); removeEventListener('pointerdown', close) }
+  }, [])
+  return <div className="language-switcher" ref={root}>
+    <button type="button" className="language-button" aria-label={`${label}: ${languages.find(([code]) => code === lang)[2]}`} aria-expanded={open} aria-controls="language-menu" onClick={() => setOpen(!open)}>
+      <span>{lang.toUpperCase()}</span><i aria-hidden="true">⌄</i>
+    </button>
+    <div className={`language-menu ${open ? 'open' : ''}`} id="language-menu" role="menu" aria-label={label}>
+      {languages.map(([code, short, name]) => <button type="button" role="menuitemradio" aria-checked={lang === code} className={lang === code ? 'active' : ''} key={code} onClick={() => { setLang(code); setOpen(false) }}><span>{short}</span>{name}<i aria-hidden="true">✓</i></button>)}
+    </div>
+  </div>
+}
+
+function Header({ t, lang, setLang }) {
   const [open, setOpen] = useState(false)
   useEffect(() => {
     document.body.classList.toggle('menu-open', open)
     const close = (event) => event.key === 'Escape' && setOpen(false)
     addEventListener('keydown', close)
-    return () => {
-      document.body.classList.remove('menu-open')
-      removeEventListener('keydown', close)
-    }
+    return () => { document.body.classList.remove('menu-open'); removeEventListener('keydown', close) }
   }, [open])
   return <>
-    <a className="skip-link" href="#main">Skip to content</a>
+    <a className="skip-link" href="#main">{t.skip}</a>
     <header className="site-header">
-      <a className="wordmark" href="#top" aria-label="Oumar Camara, home"><b>Oumar</b> Camara</a>
-      <div className="header-center"><span>Full-stack product engineer</span><span>Switzerland · CET</span></div>
-      <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="menu"><span>{open ? 'Close' : 'Menu'}</span><i /></button>
+      <a className="wordmark" href="#top" aria-label={t.home}><b>Oumar</b> Camara</a>
+      <div className="header-center"><span>{t.role}</span><span>{t.location}</span></div>
+      <div className="header-actions"><LanguageSwitcher lang={lang} setLang={setLang} label={t.language}/><button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="menu"><span>{open ? t.close : t.menu}</span><i /></button></div>
     </header>
     <div className={`menu-panel ${open ? 'open' : ''}`} id="menu" aria-hidden={!open}>
-      <nav>{[['01','Work','#work'],['02','Decisions','#decisions'],['03','About','#about']].map(([n,l,h]) => <a key={l} href={h} onClick={() => setOpen(false)}><small>{n}</small>{l}<Arrow /></a>)}</nav>
-      <div className="menu-contact"><a href="mailto:omarcamaraq@gmail.com">Email</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a></div>
+      <nav>{t.nav.map((label, i) => <a key={label} href={['#work','#decisions','#about'][i]} onClick={() => setOpen(false)}><small>0{i + 1}</small>{label}<Arrow /></a>)}</nav>
+      <div className="menu-contact"><a href="mailto:omarcamaraq@gmail.com">{t.email}</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a></div>
     </div>
     <div className="progress" aria-hidden="true"><i /></div>
   </>
 }
 
-function Hero() {
+function Hero({ t }) {
   return <section className="hero" id="top">
-    <div className="hero-status" data-reveal><i /> Available for selected frontend &amp; full-stack roles</div>
-    <h1 aria-label="I engineer what users should never have to think about">
-      <span className="hero-line line-a"><i>I engineer</i></span>
-      <span className="hero-line line-b"><i>what users</i></span>
-      <span className="hero-line line-c"><i>should never</i></span>
-      <span className="hero-line line-d"><i>have to</i></span>
-      <span className="hero-line line-e"><i>think about.</i></span>
-    </h1>
+    <div className="hero-status" data-reveal><i />{t.available}</div>
+    <h1 aria-label={t.heroLabel}>{t.hero.map((line, i) => <span className={`hero-line line-${'abcde'[i]}`} key={line}><i>{line}</i></span>)}</h1>
     <div className="hero-foot" data-reveal>
-      <div className="hero-intro"><p>Product-minded engineer turning complex rules into interfaces that feel obvious and systems that stay correct.</p><div className="hero-socials"><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a><a href="mailto:omarcamaraq@gmail.com?subject=Portfolio%20conversation">Email <Arrow /></a></div></div>
-      <a className="round-link" href="#work"><span>Explore<br/>selected work</span><b>↓</b></a>
+      <div className="hero-intro"><p>{t.intro}</p><div className="hero-socials"><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a><a href="mailto:omarcamaraq@gmail.com?subject=Portfolio%20conversation">{t.email} <Arrow /></a></div></div>
+      <a className="round-link" href="#work"><span>{t.explore[0]}<br/>{t.explore[1]}</span><b>↓</b></a>
       <p className="hero-index">React · TypeScript · Supabase · Stripe</p>
     </div>
-    <div className="hero-proof" data-reveal aria-label="Facturo product facts">
-      <span><strong>Live</strong> production SaaS</span>
-      <span><strong>5</strong> product languages</span>
-      <span><strong>4</strong> subscription plans</span>
-      <span><strong>9</strong> referral tiers</span>
-    </div>
+    <div className="hero-proof" data-reveal aria-label={t.factsLabel}>{t.facts.map(([value, label]) => <span key={label}><strong>{value}</strong>{label}</span>)}</div>
     <span className="hero-orbit" aria-hidden="true">BUILD · SHIP · LEARN ·</span>
   </section>
 }
 
-function Statement() {
-  return <section className="statement">
-    <p className="eyebrow" data-reveal>What I do</p>
-    <p className="statement-copy" data-reveal>I work across the product, <span>from the first interaction to the last database policy.</span> My job is to reduce complexity without hiding the truth of the system.</p>
-    <div className="velocity" aria-hidden="true"><div>PRODUCT ENGINEERING · PRODUCT ENGINEERING · PRODUCT ENGINEERING ·</div></div>
-  </section>
+function Statement({ t }) {
+  return <section className="statement"><p className="eyebrow" data-reveal>{t.statementLabel}</p><p className="statement-copy" data-reveal>{t.statement[0]}<span>{t.statement[1]}</span>{t.statement[2]}</p><div className="velocity" aria-hidden="true"><div>{`${t.marquee} · `.repeat(6)}</div></div></section>
 }
 
-function Work() {
+function Work({ t }) {
   return <section className="work" id="work">
-    <div className="section-top" data-reveal><span>01 / Selected work</span><span>One product · Full ownership · Live</span></div>
-    <div className="work-title" data-reveal><p>Case study</p><h2>Facturo<span>®</span></h2><a href="https://facturo.ch" target="_blank" rel="noopener noreferrer">Live product <Arrow /></a></div>
-    <div className="case-overview" data-reveal><p>A production SaaS for Swiss freelancers and SMEs. I owned the experience, data model, payment infrastructure, security boundaries, and deployment.</p><div><span>Role</span><b>Founder / Engineer</b><span>Stack</span><b>React / TS / Supabase / Stripe</b></div></div>
-    <div className="case-brief" data-reveal>
-      <article><span>01 / Problem</span><p>Swiss invoicing combines VAT, QR payment standards, multilingual documents, customer data, and subscription access. Each rule must stay correct without making the workflow feel complicated.</p></article>
-      <article><span>02 / Approach</span><p>I designed one product model across the interface, database policies, invoice output, and payment state, then built clear paths for the common work users need to finish.</p></article>
-      <article><span>03 / Result</span><p>A live SaaS where freelancers and SMEs can move from client details to compliant invoices, billing, and referrals in one coherent product.</p></article>
-    </div>
-    <div className="project-rows">
-      {frames.map((frame, index) => <article className="project-row" data-reveal key={frame.title}>
-        <a className="project-media" href={frame.href} target="_blank" rel="noopener noreferrer">
-          <div className="browser-chrome"><i/><i/><i/><span>facturo.ch</span></div>
-          <img src={frame.src} alt={`${frame.title} in the live Facturo product`} loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />
-          <b>Open live experience <Arrow /></b>
-        </a>
-        <div className="project-copy"><span>0{index + 1}</span><small>{frame.label}</small><h3>{frame.title}</h3><p>{frame.text}</p><a href={frame.href} target="_blank" rel="noopener noreferrer">View live <Arrow /></a></div>
-      </article>)}
-    </div>
+    <div className="section-top" data-reveal><span>{t.workTop[0]}</span><span>{t.workTop[1]}</span></div>
+    <div className="work-title" data-reveal><p>{t.caseStudy}</p><h2>Facturo<span>®</span></h2><a href="https://facturo.ch" target="_blank" rel="noopener noreferrer">{t.liveProduct} <Arrow /></a></div>
+    <div className="case-overview" data-reveal><p>{t.overview}</p><div><span>{t.roleLabel}</span><b>{t.roleValue}</b><span>{t.stack}</span><b>React / TS / Supabase / Stripe</b></div></div>
+    <div className="case-brief" data-reveal>{t.briefs.map(([title, text]) => <article key={title}><span>{title}</span><p>{text}</p></article>)}</div>
+    <div className="project-rows">{t.frames.map(([label, title, text], index) => <article className="project-row" data-reveal key={title}>
+      <a className="project-media" href={frameLinks[index]} target="_blank" rel="noopener noreferrer"><div className="browser-chrome"><i/><i/><i/><span>facturo.ch</span></div><img src={`${import.meta.env.BASE_URL}images/${frameImages[index]}`} alt={`${title} ${t.imageAlt}`} loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" /><b>{t.openLive} <Arrow /></b></a>
+      <div className="project-copy"><span>0{index + 1}</span><small>{label}</small><h3>{title}</h3><p>{text}</p><a href={frameLinks[index]} target="_blank" rel="noopener noreferrer">{t.viewLive} <Arrow /></a></div>
+    </article>)}</div>
   </section>
 }
 
-function Decisions() {
-  return <section className="decisions" id="decisions">
-    <div className="section-top inverse" data-reveal><span>02 / Engineering decisions</span><span>Under the interface</span></div>
-    <div className="decision-heading" data-reveal><h2>Pretty isn’t enough.<br/><em>It has to hold.</em></h2><p>The most important work happens where product behavior meets unreliable networks, sensitive data, and rules that cannot be approximate.</p></div>
-    <div className="decision-list">{decisions.map(([n,title,text]) => <article key={n} data-reveal><span>{n}</span><h3>{title}</h3><p>{text}</p><i>↗</i></article>)}</div>
-  </section>
+function Decisions({ t }) {
+  return <section className="decisions" id="decisions"><div className="section-top inverse" data-reveal><span>{t.decisionsTop[0]}</span><span>{t.decisionsTop[1]}</span></div><div className="decision-heading" data-reveal><h2>{t.decisionsHeading[0]}<br/><em>{t.decisionsHeading[1]}</em></h2><p>{t.decisionsIntro}</p></div><div className="decision-list">{t.decisions.map(([title,text], i) => <article key={title} data-reveal><span>0{i + 1}</span><h3>{title}</h3><p>{text}</p><i>↗</i></article>)}</div></section>
 }
 
-function HiringSignal() {
-  return <section className="hiring-signal">
-    <div className="section-top" data-reveal><span>Why Oumar</span><span>What I bring to a product team</span></div>
-    <div className="hiring-head" data-reveal><p>The short version</p><h2>Someone who can see the <em>whole system</em> and still care about the last pixel.</h2></div>
-    <div className="hiring-grid">
-      <article data-reveal><span>01</span><h3>Product ownership</h3><p>I turn unclear requirements into a shippable scope, make trade-offs visible, and stay responsible for the result after release.</p></article>
-      <article data-reveal><span>02</span><h3>Frontend craft</h3><p>I build responsive, accessible interfaces with a strong visual standard without letting polish weaken performance or maintainability.</p></article>
-      <article data-reveal><span>03</span><h3>Backend judgment</h3><p>I understand the trust boundaries behind the UI: data ownership, migrations, payment state, retries, and production failure modes.</p></article>
-    </div>
-  </section>
+function HiringSignal({ t }) {
+  return <section className="hiring-signal"><div className="section-top" data-reveal><span>{t.whyTop[0]}</span><span>{t.whyTop[1]}</span></div><div className="hiring-head" data-reveal><p>{t.short}</p><h2>{t.whyHeading[0]}<em>{t.whyHeading[1]}</em>{t.whyHeading[2]}</h2></div><div className="hiring-grid">{t.strengths.map(([title,text], i) => <article data-reveal key={title}><span>0{i + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
 }
 
-function About() {
-  return <section className="about" id="about">
-    <div className="section-top" data-reveal><span>03 / About</span><span>Engineer · Builder · Owner</span></div>
-    <div className="about-main">
-      <h2 data-reveal>I build like an <em>owner,</em> think like a user, and execute like an engineer.</h2>
-      <div className="about-copy" data-reveal><p>I’m Oumar, a full-stack product engineer based in Switzerland. Give me an unclear, high-responsibility problem and I’ll turn it into a system the team can understand, ship, and trust.</p><p>I don’t stop at the edge of the frontend. I follow the outcome through data design, authorization, payments, failure states, deployment, and the details users feel but never see.</p><p>I’m looking for a frontend or full-stack product role where judgment matters as much as implementation. I want to work where engineers are trusted to improve the product, not only complete tickets.</p><a href="mailto:omarcamaraq@gmail.com">Let’s work together <Arrow /></a></div>
-    </div>
-    <div className="about-proof" data-reveal>
-      <article><span>Proof of execution</span><strong>Built Facturo from zero to a live production SaaS.</strong></article>
-      <article><span>Depth of ownership</span><strong>Interface, database, security, billing, and deployment.</strong></article>
-      <article><span>Product judgment</span><strong>Complex Swiss rules translated into straightforward workflows.</strong></article>
-    </div>
-    <blockquote data-reveal>“The best engineering work makes complexity disappear for the user, not for the system.”</blockquote>
-    <div className="stack-rail" data-reveal>{['React','TypeScript','Product systems','PostgreSQL','Supabase','Stripe','RLS','Edge Functions','Vercel','Accessibility'].map((x,i)=><span key={x}><small>{String(i+1).padStart(2,'0')}</small>{x}</span>)}</div>
-  </section>
+function About({ t }) {
+  return <section className="about" id="about"><div className="section-top" data-reveal><span>{t.aboutTop[0]}</span><span>{t.aboutTop[1]}</span></div><div className="about-main"><h2 data-reveal>{t.aboutHeading[0]}<em>{t.aboutHeading[1]}</em>{t.aboutHeading[2]}</h2><div className="about-copy" data-reveal>{t.about.map((p) => <p key={p}>{p}</p>)}<a href="mailto:omarcamaraq@gmail.com">{t.together} <Arrow /></a></div></div><div className="about-proof" data-reveal>{t.proof.map(([label,text]) => <article key={label}><span>{label}</span><strong>{text}</strong></article>)}</div><blockquote data-reveal>{t.quote}</blockquote><div className="stack-rail" data-reveal>{['React','TypeScript','Product systems','PostgreSQL','Supabase','Stripe','RLS','Edge Functions','Vercel','Accessibility'].map((x,i)=><span key={x}><small>{String(i+1).padStart(2,'0')}</small>{x}</span>)}</div></section>
 }
 
-function Footer() {
-  return <footer><div className="footer-light"><p data-reveal>Have a hard problem?</p><a data-reveal href="mailto:omarcamaraq@gmail.com">Let’s solve it.<Arrow /></a><div className="contact-row" data-reveal><a href="mailto:omarcamaraq@gmail.com">Email</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a><a href="https://facturo.ch" target="_blank" rel="noopener noreferrer">Facturo <Arrow /></a></div></div><div className="footer-dark"><span>Oumar Camara © 2026</span><span>Switzerland / Remote Europe</span><a href="#top">Back to the top ↑</a></div></footer>
+function Footer({ t }) {
+  return <footer><div className="footer-light"><p data-reveal>{t.hardProblem}</p><a data-reveal href="mailto:omarcamaraq@gmail.com">{t.solve}<Arrow /></a><div className="contact-row" data-reveal><a href="mailto:omarcamaraq@gmail.com">{t.email}</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a><a href="https://facturo.ch" target="_blank" rel="noopener noreferrer">Facturo <Arrow /></a></div></div><div className="footer-dark"><span>Oumar Camara © 2026</span><span>{t.remote}</span><a href="#top">{t.back} ↑</a></div></footer>
+}
+
+function getInitialLanguage() {
+  const saved = localStorage.getItem('portfolio-language')
+  if (translations[saved]) return saved
+  const browser = navigator.language?.slice(0, 2).toLowerCase()
+  return translations[browser] ? browser : 'en'
 }
 
 export default function App() {
   useMotionSystem()
-  return <><Header/><main id="main"><Hero/><Statement/><Work/><Decisions/><HiringSignal/><About/></main><Footer/></>
+  const [lang, setLang] = useState(getInitialLanguage)
+  const t = translations[lang]
+  useEffect(() => {
+    document.documentElement.lang = lang
+    document.title = t.meta[0]
+    document.querySelector('meta[name="description"]')?.setAttribute('content', t.meta[1])
+    localStorage.setItem('portfolio-language', lang)
+  }, [lang, t])
+  return <><Header t={t} lang={lang} setLang={setLang}/><main id="main"><Hero t={t}/><Statement t={t}/><Work t={t}/><Decisions t={t}/><HiringSignal t={t}/><About t={t}/></main><Footer t={t}/></>
 }
