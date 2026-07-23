@@ -69,7 +69,7 @@ function Header({ t, lang, setLang }) {
     </header>
     <div className={`menu-panel ${open ? 'open' : ''}`} id="menu" aria-hidden={!open}>
       <nav>{t.nav.map((label, i) => <a key={label} href={['#work','#decisions','#about'][i]} onClick={() => setOpen(false)}><small>0{i + 1}</small>{label}<Arrow /></a>)}</nav>
-      <div className="menu-contact"><a href="mailto:omarcamaraq@gmail.com">{t.email}</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a></div>
+      <div className="menu-contact"><a href={`${import.meta.env.BASE_URL}cv/oumar-camara-${lang}.html`} download>{t.resume}</a><a href="mailto:omarcamaraq@gmail.com">{t.email}</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a></div>
     </div>
     <div className="progress" aria-hidden="true"><i /></div>
   </>
@@ -118,11 +118,13 @@ function About({ t }) {
   return <section className="about" id="about"><div className="section-top" data-reveal><span>{t.aboutTop[0]}</span><span>{t.aboutTop[1]}</span></div><div className="about-main"><h2 data-reveal>{t.aboutHeading[0]}<em>{t.aboutHeading[1]}</em>{t.aboutHeading[2]}</h2><div className="about-copy" data-reveal>{t.about.map((p) => <p key={p}>{p}</p>)}<a href="mailto:omarcamaraq@gmail.com">{t.together} <Arrow /></a></div></div><div className="about-proof" data-reveal>{t.proof.map(([label,text]) => <article key={label}><span>{label}</span><strong>{text}</strong></article>)}</div><blockquote data-reveal>{t.quote}</blockquote><div className="stack-rail" data-reveal>{['React','TypeScript','Product systems','PostgreSQL','Supabase','Stripe','RLS','Edge Functions','Vercel','Accessibility'].map((x,i)=><span key={x}><small>{String(i+1).padStart(2,'0')}</small>{x}</span>)}</div></section>
 }
 
-function Footer({ t }) {
-  return <footer><div className="footer-light"><p data-reveal>{t.hardProblem}</p><a data-reveal href="mailto:omarcamaraq@gmail.com">{t.solve}<Arrow /></a><div className="contact-row" data-reveal><a href="mailto:omarcamaraq@gmail.com">{t.email}</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a><a href="https://facturo.ch" target="_blank" rel="noopener noreferrer">Facturo <Arrow /></a></div></div><div className="footer-dark"><span>Oumar Camara © 2026</span><span>{t.remote}</span><a href="#top">{t.back} ↑</a></div></footer>
+function Footer({ t, lang }) {
+  return <footer><div className="footer-light"><p data-reveal>{t.hardProblem}</p><a data-reveal href="mailto:omarcamaraq@gmail.com">{t.solve}<Arrow /></a><div className="contact-row" data-reveal><a href={`${import.meta.env.BASE_URL}cv/oumar-camara-${lang}.html`} download>{t.resume}</a><a href="mailto:omarcamaraq@gmail.com">{t.email}</a><a href="https://www.linkedin.com/in/oumar-c-204b21295/" target="_blank" rel="noopener noreferrer">LinkedIn <Arrow /></a><a href="https://github.com/oumarccamara" target="_blank" rel="noopener noreferrer">GitHub <Arrow /></a><a href="https://facturo.ch" target="_blank" rel="noopener noreferrer">Facturo <Arrow /></a></div></div><div className="footer-dark"><span>Oumar Camara © 2026</span><span>{t.remote}</span><a href="#top">{t.back} ↑</a></div></footer>
 }
 
 function getInitialLanguage() {
+  const pathLanguage = location.pathname.split('/').filter(Boolean).at(-1)
+  if (translations[pathLanguage]) return pathLanguage
   const saved = localStorage.getItem('portfolio-language')
   if (translations[saved]) return saved
   const browser = navigator.language?.slice(0, 2).toLowerCase()
@@ -137,7 +139,14 @@ export default function App() {
     document.documentElement.lang = lang
     document.title = t.meta[0]
     document.querySelector('meta[name="description"]')?.setAttribute('content', t.meta[1])
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', t.meta[0])
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', t.meta[1])
+    document.querySelector('meta[property="og:locale"]')?.setAttribute('content', { en: 'en_US', es: 'es_ES', de: 'de_DE', it: 'it_IT', fr: 'fr_FR' }[lang])
+    const localeUrl = new URL(`${import.meta.env.BASE_URL}${lang}/`, location.origin)
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', localeUrl.href)
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', localeUrl.href)
+    if (location.pathname !== localeUrl.pathname) history.replaceState({ lang }, '', `${localeUrl.pathname}${location.hash}`)
     localStorage.setItem('portfolio-language', lang)
   }, [lang, t])
-  return <><Header t={t} lang={lang} setLang={setLang}/><main id="main"><Hero t={t}/><Statement t={t}/><Work t={t}/><Decisions t={t}/><HiringSignal t={t}/><About t={t}/></main><Footer t={t}/></>
+  return <><Header t={t} lang={lang} setLang={setLang}/><main id="main"><Hero t={t}/><Statement t={t}/><Work t={t}/><Decisions t={t}/><HiringSignal t={t}/><About t={t}/></main><Footer t={t} lang={lang}/></>
 }

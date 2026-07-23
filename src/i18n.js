@@ -9,7 +9,7 @@ export const languages = [
 const en = {
   meta: ['Oumar Camara | Product Engineer', 'Oumar Camara is a full-stack product engineer in Switzerland. Creator of Facturo, a production SaaS for Swiss invoicing.'],
   skip: 'Skip to content', home: 'Oumar Camara, home', role: 'Full-stack product engineer', location: 'Switzerland · CET',
-  menu: 'Menu', close: 'Close', language: 'Language', nav: ['Work', 'Decisions', 'About'],
+  menu: 'Menu', close: 'Close', language: 'Language', resume: 'Download résumé', nav: ['Work', 'Decisions', 'About'],
   available: 'Available for selected frontend & full-stack roles',
   hero: ['I engineer', 'what users', 'should never', 'have to', 'think about.'],
   heroLabel: 'I engineer what users should never have to think about',
@@ -69,7 +69,7 @@ const en = {
 
 const es = {
   ...en, meta: ['Oumar Camara | Ingeniero de producto', 'Oumar Camara es ingeniero de producto full-stack en Suiza y creador de Facturo, un SaaS de facturación suiza en producción.'],
-  skip: 'Saltar al contenido', home: 'Oumar Camara, inicio', role: 'Ingeniero de producto full-stack', location: 'Suiza · CET', menu: 'Menú', close: 'Cerrar', language: 'Idioma', nav: ['Proyectos', 'Decisiones', 'Sobre mí'],
+  skip: 'Saltar al contenido', home: 'Oumar Camara, inicio', role: 'Ingeniero de producto full-stack', location: 'Suiza · CET', menu: 'Menú', close: 'Cerrar', language: 'Idioma', resume: 'Descargar currículum', nav: ['Proyectos', 'Decisiones', 'Sobre mí'],
   available: 'Disponible para puestos seleccionados de frontend y full-stack', hero: ['Diseño', 'lo que los usuarios', 'nunca deberían', 'tener que', 'pensar.'], heroLabel: 'Diseño lo que los usuarios nunca deberían tener que pensar',
   intro: 'Ingeniero orientado al producto que convierte reglas complejas en interfaces intuitivas y sistemas fiables.', email: 'Correo', explore: ['Explorar', 'proyectos seleccionados'],
   factsLabel: 'Datos del producto Facturo', facts: [['En vivo', 'SaaS en producción'], ['5', 'idiomas del producto'], ['4', 'planes de suscripción'], ['9', 'niveles de referidos']],
@@ -90,7 +90,7 @@ const es = {
 
 const de = {
   ...en, meta: ['Oumar Camara | Product Engineer', 'Oumar Camara ist Full-Stack Product Engineer in der Schweiz und Gründer von Facturo, einer produktiven SaaS für Schweizer Rechnungen.'],
-  skip: 'Zum Inhalt springen', home: 'Oumar Camara, Startseite', role: 'Full-Stack Product Engineer', location: 'Schweiz · MEZ', menu: 'Menü', close: 'Schließen', language: 'Sprache', nav: ['Projekte', 'Entscheidungen', 'Über mich'],
+  skip: 'Zum Inhalt springen', home: 'Oumar Camara, Startseite', role: 'Full-Stack Product Engineer', location: 'Schweiz · MEZ', menu: 'Menü', close: 'Schließen', language: 'Sprache', resume: 'Lebenslauf herunterladen', nav: ['Projekte', 'Entscheidungen', 'Über mich'],
   available: 'Offen für ausgewählte Frontend- und Full-Stack-Positionen', hero: ['Ich entwickle,', 'worüber Nutzer', 'niemals', 'nachdenken', 'sollten.'], heroLabel: 'Ich entwickle, worüber Nutzer niemals nachdenken sollten',
   intro: 'Produktorientierter Entwickler, der komplexe Regeln in intuitive Oberflächen und verlässliche Systeme übersetzt.', email: 'E-Mail', explore: ['Ausgewählte', 'Projekte ansehen'],
   factsLabel: 'Fakten zum Produkt Facturo', facts: [['Live', 'SaaS in Produktion'], ['5', 'Produktsprachen'], ['4', 'Abomodelle'], ['9', 'Empfehlungsstufen']],
@@ -111,7 +111,7 @@ const de = {
 
 const it = {
   ...en, meta: ['Oumar Camara | Ingegnere di prodotto', 'Oumar Camara è un ingegnere di prodotto full-stack in Svizzera e creatore di Facturo, un SaaS di fatturazione svizzera in produzione.'],
-  skip: 'Vai al contenuto', home: 'Oumar Camara, home', role: 'Ingegnere di prodotto full-stack', location: 'Svizzera · CET', menu: 'Menu', close: 'Chiudi', language: 'Lingua', nav: ['Progetti', 'Decisioni', 'Chi sono'],
+  skip: 'Vai al contenuto', home: 'Oumar Camara, home', role: 'Ingegnere di prodotto full-stack', location: 'Svizzera · CET', menu: 'Menu', close: 'Chiudi', language: 'Lingua', resume: 'Scarica il curriculum', nav: ['Progetti', 'Decisioni', 'Chi sono'],
   available: 'Disponibile per ruoli frontend e full-stack selezionati', hero: ['Progetto', 'ciò a cui gli utenti', 'non dovrebbero', 'mai dover', 'pensare.'], heroLabel: 'Progetto ciò a cui gli utenti non dovrebbero mai dover pensare',
   intro: 'Ingegnere orientato al prodotto che trasforma regole complesse in interfacce intuitive e sistemi affidabili.', email: 'Email', explore: ['Scopri', 'i progetti scelti'],
   factsLabel: 'Dati sul prodotto Facturo', facts: [['Live', 'SaaS in produzione'], ['5', 'lingue del prodotto'], ['4', 'piani di abbonamento'], ['9', 'livelli referral']],
@@ -132,7 +132,7 @@ const it = {
 
 const fr = {
   ...en, meta: ['Oumar Camara | Ingénieur produit', 'Oumar Camara est ingénieur produit full-stack en Suisse et créateur de Facturo, un SaaS de facturation suisse en production.'],
-  skip: 'Aller au contenu', home: 'Oumar Camara, accueil', role: 'Ingénieur produit full-stack', location: 'Suisse · CET', menu: 'Menu', close: 'Fermer', language: 'Langue', nav: ['Projets', 'Décisions', 'À propos'],
+  skip: 'Aller au contenu', home: 'Oumar Camara, accueil', role: 'Ingénieur produit full-stack', location: 'Suisse · CET', menu: 'Menu', close: 'Fermer', language: 'Langue', resume: 'Télécharger le CV', nav: ['Projets', 'Décisions', 'À propos'],
   available: 'Disponible pour certains postes frontend et full-stack', hero: ['Je conçois', 'ce à quoi', 'les utilisateurs', 'ne devraient jamais', 'avoir à penser.'], heroLabel: 'Je conçois ce à quoi les utilisateurs ne devraient jamais avoir à penser',
   intro: 'Ingénieur orienté produit, je transforme des règles complexes en interfaces intuitives et en systèmes fiables.', email: 'E-mail', explore: ['Découvrir', 'les projets choisis'],
   factsLabel: 'Chiffres du produit Facturo', facts: [['En ligne', 'SaaS en production'], ['5', 'langues du produit'], ['4', 'formules d’abonnement'], ['9', 'paliers de parrainage']],
